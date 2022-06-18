@@ -1,38 +1,212 @@
+.ActionContent {
+  position: absolute;
+  top: 30vh;
+  width: 100vw;
+  height: 40vh;
+}
+
 .App {
+  position: relative;
+  background-color: #711515;
   text-align: center;
+  height: 100vh;
+  color: white;
+  font-size: calc(10px + 2vmin);
+  transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+  overflow: hidden;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.UserData {
+  position: absolute;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.User {
+  top: 10px;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.Attends {
+  background-color: #242d42;
+}
+
+.MaDuc {
+  display: inline-block;
+  height: 10vh;
+  width: 50vw;
+  border-radius: 11px;
+  border: 0 none;
+  color: white;
+  background-color: #791818;
+  box-shadow: -2px -2px 9px 0px #9b3939, 6px 4px 9px 0px #2f0404;
+}
+
+.Attends .MaDuc {
+  background-color: #283148;
+  box-shadow: -2px -2px 9px 0px #586583, 6px 4px 9px 0px #090d17;
+}
+
+.Auth {
+  height: 25vh;
+  position: absolute;
+  bottom: 20vh;
+  width: 100vw;
+  transition: transform 0.3s, bottom 0.6s;
+}
+
+.WayBottom.Auth {
+  position: absolute;
+  bottom: -10vh;
+}
+
+.Zoom.Auth {
+  transform: scale3d(1.1, 1.1, 0.5) rotate(3deg);
+}
+
+.LoginInputs {
+  display: flex;
+  flex-direction: column;
+  gap: 1vh;
+  align-items: center;
+}
+
+.AppHeader {
+  height: 30vh;
+  position: absolute;
+  width: 100vw;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+}
+
+.Attendees {
+  position: fixed;
+  width: 100%;
+  top: 25vh;
+  max-height: 55vh;
+}
+
+.AttendeesList {
+  display: flex;
+  width: 100%;
+  height: 50vh;
+  background-color: #8bafdf;
+  overflow: scroll;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.AttendeesList ul li {
+  text-align: left;
+  display: flex;
+  gap: 2vw;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.AttendeesList ul li .Person {
+  font-size: medium;
+}
+
+.AttendeesList ul li .Person.P5 {
+  margin-left: 2px;
+  margin-right: -2px;
+}
+
+.AttendeesList.Hidden {
+  display: none;
+}
+
+.HideAttendees {
+  color: black;
+  position: relative;
+  width: 100%;
+  padding-top: 10px;
+}
+
+.Glogo {
+  height: 3vh;
+}
+
+.UserMenu {
+  display: flex;
+  position: fixed;
+  z-index: 99;
+  top: 0;
+  right: 0;
+  justify-content: flex-end;
+}
+
+.UserMenu .Trigger {
+  position: absolute;
+  right: 2vw;
+  top: 2vh;
+}
+
+.UserMenuForm.Hidden {
+  transform: translateX(100vh);
+}
+
+.UserMenuForm {
+  border-radius: 10px;
+  padding-top: 20vh;
+  background-color: #711515;
+  box-shadow: -2px -2px 9px 0px #9b3939, 6px 4px 9px 0px #2f0404;
+  position: absolute;
+  top: 1vh;
+  height: 78vh;
+  right: -1vh;
+  width: 100vw;
+  transition: transform 0.6s ease;
+}
+
+.Attends .UserMenuForm {
+  background-color: #242d42;
+  box-shadow: -2px -2px 9px 0px #2f3952, 6px 4px 9px 0px #1c2536;
+}
+
+.UserMenuForm .Checkbox {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 3vh;
+}
+
+.UserMenuForm .Checkbox input {
+  transform: scale(1.4);
+}
+
+.UserMenuForm .Checkbox label {
+  margin-left: 2vw;
+}
+
+.UserMenu .Error {
+  padding-top: 5vh;
+}
+
+.LoginInputs .Action {
+  margin-top: 30vh;
+  border: 0 none;
+  transition: color .5s;
+}
+
+.LoginInputs .Email {
+  margin-top: 3vh;
+}
+
+.LoginSelect {
+  font-size: small;
+  text-decoration: underline;
+  padding: 2vw;
+}
+
+.Selected {
+  text-decoration: underline;
+}
+
+.Action.Highlight {
+  background-color: #2d62a6;
   color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  font-weight: bold;
+  box-shadow: -2px -2px 9px 0 #2f3952, 6px 4px 9px 0 #1c2536, 0 0 8px 1px #92E9FF;
 }

@@ -11,3 +11,22 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+input[type=email],
+input[type=password],
+input[type=text] {
+  height: 5vh;
+  min-width: 60vw;
+  padding: 0 5vw;
+}
+
+button {
+  height: 5vh;
+  padding: 1vh 5vw;
+  min-width: 70vw;
+  display: flex;
+  align-items: center;
+  gap: 4vw;
+  justify-content: center;
+  border-radius: 10px;
+}
