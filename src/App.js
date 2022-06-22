@@ -45,6 +45,7 @@ const nextGame = format(nextGameDay, 'yyyyMMdd')
 function App() {
   const [user, setUser] = useState();
   const [attends, setAttends] = useState(false)
+  const [keyedAttendees, setKeyedAttendees] = useState([])
   const [attendees, setAttendees] = useState([])
   const [showAttendees, setShowAttendees] = useState(false)
   const [showNeedsLogin, setShowNeedsLogin] = useState(false)
@@ -52,7 +53,13 @@ function App() {
 
   useEffect(() => {
     init(auth, setUser)
-  }, [auth])
+  }, [])
+
+  useEffect(() => {
+    document
+      .querySelector('meta[name="theme-color"]')
+      .setAttribute("content", attends ? '#283148' : '#711515');
+  }, [attends])
 
   useEffect(() => {
     if (!user) {
@@ -62,10 +69,13 @@ function App() {
       getStatus(user.uid, val => {
         setAttends(val);
         getAttendees(att => {
-          setAttendees(Object.keys(att).map(a => ({
-            ...att[a],
-              uid: a,
-          })))
+          setKeyedAttendees(att);
+          setAttendees(
+            Object.keys(att)
+              .filter(a => att[a].timestamp)
+              .map(a => ({ ...att[a], uid: a }))
+              .sort((a, b) => a.timestamp - b.timestamp)
+          )
         }, (e) => {
           console.log(e)
         })
@@ -87,6 +97,18 @@ function App() {
     }
   }
 
+  function incrementExternal() {
+    if (user && keyedAttendees[user.uid]) {
+      setExternalsCount(user.uid, +(keyedAttendees[user.uid].externals || 0) + 1, () => {}, () => {});
+    }
+  }
+
+  function decrementExternal() {
+    if (user && keyedAttendees[user.uid] && +keyedAttendees[user.uid].externals) {
+      setExternalsCount(user.uid, Math.max(+(keyedAttendees[user.uid].externals || 0) - 1, 0), () => {}, () => {});
+    }
+  }
+
   function toggleShowAttendees() {
     if (user) {
       setShowAttendees(!showAttendees)
@@ -103,20 +125,27 @@ function App() {
   return (
     <>
       <div className={`App ${attends ? 'Attends' : ''}`}>
-        {user && <UserMenu user={user} usersList={usersList}/>}
+        {user && <UserMenu user={user} setUser={setUser} usersList={usersList}/>}
         <header className="AppHeader">
           <section className="UserData">
             Joi {format(nextGameDay, 'd/M/yyyy')}
-            {user && <p>({attendees.length} participanti)</p>}
+            {user && <p>({getAttendeesCount(keyedAttendees)} participanti)</p>}
           </section>
         </header>
 
         <section className="ActionContent">
           <p>{attends ? 'Ma duc la fotbal Joi' : 'Nu ma duc la fotbal Joi'}</p>
           <button className="MaDuc" onClick={toggleAttendance}>{attends ? 'M-am razgandit' : 'Ba ma duc'}</button>
+          {user &&
+            <section className="Externi">
+              <p>{keyedAttendees[user.uid]?.externals ? (keyedAttendees[user.uid].externals > 1 ? `Aduc si ${keyedAttendees[user.uid].externals} prieteni` : 'Aduc si un prieten') : ''}</p>
+              <section className="ExterniActions">
+                <button className="Extern" onClick={incrementExternal}>+1 Extern</button>
+                <button className="Extern" onClick={decrementExternal}>-1 Extern</button>
+              </section>
+            </section>
+          }
         </section>
-
-        {/*{user && JSON.stringify(user, null, 2)}*/}
 
         <div className={'Auth ' + (!user ? '' : 'WayBottom') + (showNeedsLogin ? 'Zoom' : '')}>
           <Login user={user} setUser={u => setUser(u)}/>
@@ -138,6 +167,7 @@ function App() {
                       <span className="Person material-icons">person_add</span>
                     }
                     {usersList[a.uid]?.name || a.email}
+                    &nbsp;{keyedAttendees[a.uid].externals ? `(+${keyedAttendees[a.uid].externals})` : ''}
                   </li>)
                 }
               </ul>
@@ -155,10 +185,10 @@ function App() {
  *  Auth
  */
 const Login = ({ location, user, setUser }) => {
-  const queryCode = (window.location.search.split('&')[0] || '').split('=')[1] || '';
+  // const queryCode = (window.location.search.split('&')[0] || '').split('=')[1] || '';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [invitation, setInvitation] = useState(queryCode);
+  // const [invitation, setInvitation] = useState(queryCode);
   const [errorText, setErrorText] = useState('');
   const [loginSelect, setLoginSelect] = useState(true);
 
@@ -169,7 +199,7 @@ const Login = ({ location, user, setUser }) => {
 
   return (
     <section>
-      <form onSubmit={(e) => signIn(e, email, password, setUser)}>
+      <form id="loginForm" action='' onSubmit={(e) => signIn(e, email, password, setUser)}>
         {
           <div className="LoginInputs">
             {
@@ -182,6 +212,7 @@ const Login = ({ location, user, setUser }) => {
             {!user && <input
               placeholder="email"
               className="UsernameInput"
+              autoComplete="username"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -189,25 +220,26 @@ const Login = ({ location, user, setUser }) => {
             {!user && <input
               placeholder="parola"
               className="PasswordInput"
+              autoComplete="current-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />}
-            {
-              !user && !loginSelect &&
-              <input
-                placeholder="cod invitatie"
-                type="text"
-                value={invitation}
-                onChange={(e) => setInvitation(e.target.value)}
-              />
-            }
+            {/*{*/}
+            {/*  !user && !loginSelect &&*/}
+            {/*  <input*/}
+            {/*    placeholder="cod invitatie"*/}
+            {/*    type="text"*/}
+            {/*    value={invitation}*/}
+            {/*    onChange={(e) => setInvitation(e.target.value)}*/}
+            {/*  />*/}
+            {/*}*/}
             {
               !user &&
               <>
                 {
                   loginSelect &&
-                  <button onClick={(e) => signIn(e, email, password, setUser, displayError)}>Login</button>
+                  <button type="submit">Login</button>
                 }
                 {
                   loginSelect &&
@@ -218,13 +250,12 @@ const Login = ({ location, user, setUser }) => {
                 }
                 {
                   !loginSelect &&
-                  <button onClick={(e) => signupCredentials(e, email, password, setUser, displayError)}>
+                  <button type="submit" onClick={(e) => signupCredentials(e, email, password, 'invitation', setUser, displayError)}>
                     Creaza cont
                   </button>
                 }
               </>
             }
-            {user && <button onClick={(e) => localSignOut(e, setUser, displayError)}>Deconecteaza-ma</button>}
           </div>
         }
         { errorText && <div className='Error'>{ errorText }</div> }
@@ -233,7 +264,7 @@ const Login = ({ location, user, setUser }) => {
   );
 };
 
-const UserMenu = ({user, usersList}) => {
+const UserMenu = ({user, setUser, usersList}) => {
   const [name, setName] = useState('');
   const [p5, setP5] = useState(false);
   const [errorText, setErrorText] = useState('');
@@ -265,7 +296,7 @@ const UserMenu = ({user, usersList}) => {
 
   function displayError(text) {
     setErrorText(text);
-    setTimeout(() => setErrorText(''), 3000);
+    setTimeout(() => setErrorText(''), 5000);
   }
 
   function toggleShowSettings() {
@@ -306,6 +337,7 @@ const UserMenu = ({user, usersList}) => {
                   className={`Action ${highlightSave ? 'Highlight' : ''}`}
                   onClick={(e) => saveUserData(e, user.uid, name, p5, () => displayError('Salvat'), displayError)}
                 >Salveaza</button>
+                <button onClick={(e) => localSignOut(e, setUser, displayError)}>Deconecteaza-ma</button>
               </div>
               { errorText && <div className='Error'>{ errorText }</div> }
             </form>
@@ -338,7 +370,10 @@ const signIn = (e, email, password, onSuccess, onError) => {
   signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       const { user } = userCredential;
+      window.history.pushState({ userId: user.uid }, "Fotbal Joi", "/");
+      window.location.reload();
       onSuccess(user);
+      return true;
     })
     .catch(error => {
       console.error(error)
@@ -377,8 +412,12 @@ const loginWithGoogle = (e, onSuccess, onError) => {
   });
 }
 
-const signupCredentials = (e, email, password, onSuccess, onError) => {
+const signupCredentials = (e, email, password, invitation, onSuccess, onError) => {
   e && e.preventDefault();
+  // if (!invitation) {
+  //   onError('Ai nevoie de o invitatie pt a te inregistra')
+  //   return;
+  // }
   createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       const user = userCredential.user;
@@ -393,21 +432,30 @@ const signupCredentials = (e, email, password, onSuccess, onError) => {
 const db = getDatabase(app);
 
 function joinGame(userId, email, onSuccess, onError) {
-  set(ref(db, `/games/${nextGame}/${userId}`), {
-    email,
-    timestamp: new Date().getTime(),
-  })
-  .then(() => {
-    onSuccess()
-  })
-  .catch(error => {
-    console.error(error)
-    onError(error.message)
-  });
+  set(ref(db, `/games/${nextGame}/${userId}/timestamp`), new Date().getTime())
+  set(ref(db, `/games/${nextGame}/${userId}/email`), email)
+  // .then(() => {
+  //   onSuccess()
+  // })
+  // .catch(error => {
+  //   console.error(error)
+  //   onError(error.message)
+  // });
 }
 
 function leaveGame(userId, onSuccess, onError) {
-  remove(ref(db, `/games/${nextGame}/${userId}`))
+  remove(ref(db, `/games/${nextGame}/${userId}/timestamp`))
+    .then(() => {
+      onSuccess()
+    })
+    .catch(error => {
+      console.error(error)
+      onError(error.message)
+    });
+}
+
+function setExternalsCount(userId, count, onSuccess, onError) {
+  set(ref(db, `/games/${nextGame}/${userId}/externals`), count)
     .then(() => {
       onSuccess()
     })
@@ -420,7 +468,7 @@ function leaveGame(userId, onSuccess, onError) {
 function saveUserData(e, userId, name, p5, onSuccess, onError) {
   e && e.preventDefault();
   if (!name) {
-    onError('Dă si tu un nume!');
+    onError('Nu fi bulangiu! Pune si tu un nume sa stie omu\' cu cine joaca!');
     return;
   }
 
@@ -436,7 +484,7 @@ function saveUserData(e, userId, name, p5, onSuccess, onError) {
 }
 
 function getStatus(userId, setAttends, onError) {
-  get(child(ref(db), `/games/${nextGame}/${userId}`)).then((snapshot) => {
+  get(child(ref(db), `/games/${nextGame}/${userId}/timestamp`)).then((snapshot) => {
     if (snapshot.exists()) {
       setAttends(true)
     } else {
@@ -466,4 +514,8 @@ function getUsersList(onSuccess) {
       onSuccess({})
     }
   });
+}
+
+function getAttendeesCount(attendees) {
+  return Object.values(attendees).reduce((acc, curr) => acc + (curr.timestamp ? 1 : 0) + (+curr.externals || 0), 0)
 }
