@@ -1,6 +1,7 @@
 import './App.css';
 import { useEffect, useState } from 'react'
 import nextThursday from 'date-fns/nextThursday';
+import isThursday from 'date-fns/isThursday';
 import format from 'date-fns/format';
 
 import { initializeApp } from 'firebase/app';
@@ -36,7 +37,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const analytics = getAnalytics(app);
-const nextGameDay = nextThursday(new Date())
+
+const now = new Date();
+const nextGameDay = isThursday(now) ? now : nextThursday(now);
 const nextGame = format(nextGameDay, 'yyyyMMdd')
 
 /*
